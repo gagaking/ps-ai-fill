@@ -471,6 +471,10 @@ async function startServer() {
         // input image base64
         image_base64,
         // pure input image base64
+        ref_image_base64,
+        // reference image base64
+        style_image_base64,
+        // style image base64
         apiKey,
         // key entered in settings panel
         isSimulation = false,
@@ -636,7 +640,7 @@ async function startServer() {
         const formData = new FormData();
         formData.append("model", model);
         formData.append("prompt", prompt);
-        formData.append("n", String(n));
+        // n is not valid in FormData mode
         formData.append("response_format", response_format);
         if (model === "gpt-image-2") {
           if (size) formData.append("size", size);
@@ -648,7 +652,17 @@ async function startServer() {
         const base64Str = image || image_base64;
         const buffer = Buffer.from(base64Str, "base64");
         const blob = new Blob([buffer], { type: "image/png" });
-        formData.append("image", blob, "image.png");
+        formData.append("image", blob, "input.png");
+        if (ref_image_base64) {
+          const refBuffer = Buffer.from(ref_image_base64, "base64");
+          const refBlob = new Blob([refBuffer], { type: "image/png" });
+          formData.append("image", refBlob, "ref_1.png");
+        }
+        if (style_image_base64) {
+          const styleBuffer = Buffer.from(style_image_base64, "base64");
+          const styleBlob = new Blob([styleBuffer], { type: "image/png" });
+          formData.append("image", styleBlob, "ref_2.png");
+        }
         fetchOptions = {
           method: "POST",
           headers: {
@@ -664,6 +678,9 @@ async function startServer() {
           n: Number(n),
           response_format
         };
+        if (image_base64) payload.image_base64 = image_base64;
+        if (ref_image_base64) payload.ref_image_base64 = ref_image_base64;
+        if (style_image_base64) payload.style_image_base64 = style_image_base64;
         if (model === "gpt-image-2") {
           if (size) payload.size = size;
           if (quality) payload.quality = quality;
