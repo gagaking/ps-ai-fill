@@ -29,9 +29,9 @@ var import_dotenv = __toESM(require("dotenv"), 1);
 var import_undici = require("undici");
 import_dotenv.default.config();
 var dispatcher = new import_undici.Agent({
-  headersTimeout: 3e5,
-  // 5 minutes
-  bodyTimeout: 3e5,
+  headersTimeout: 6e5,
+  // 10 minutes
+  bodyTimeout: 6e5,
   // 5 minutes
   connectTimeout: 6e4
   // 1 minute
@@ -717,7 +717,7 @@ const isChatModel = model === "gemini-3.1-flash-lite-image";
         console.log(`[Extend Task] Size: ${size}, Quality: ${quality}, Prompt Preview: ${(prompt || "").substring(0, 120)}... isExtend: ${isExtend2}`);
       }
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3e5);
+      const timeoutId = setTimeout(() => controller.abort(), 6e5);
       fetchOptions.signal = controller.signal;
       const response = await fetch(targetURL, fetchOptions).finally(() => clearTimeout(timeoutId));
       const responseBodyText = await response.text();
