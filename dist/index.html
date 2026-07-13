@@ -153,8 +153,14 @@ window.fetch=(function(of){
    if(u.indexOf("/api/ps/generate")>-1){
     try{
       var ob=JSON.parse(init.body);
-      if(_u.length>=1&&!ob.ref_image_base64) ob.ref_image_base64=_u[0].base64;
-      if(_u.length>=2&&!ob.style_image_base64) ob.style_image_base64=_u[1].base64;
+      if(!ob.isExtend&&!ob.isOutpaint){
+        var curSrc={},allImgs=document.querySelectorAll("img[src^=blob:]");
+        for(var si=0;si<allImgs.length;si++){curSrc[allImgs[si].src]=true}
+        var fresh=_u.filter(function(e){return curSrc[e.url]});
+        if(fresh.length>=1&&!ob.ref_image_base64) ob.ref_image_base64=fresh[0].base64;
+        if(fresh.length>=2&&!ob.style_image_base64) ob.style_image_base64=fresh[1].base64;
+
+      }
       var nb=JSON.stringify(ob);
       init.body=nb;
     }catch(e){console.warn("[Ref Inject] failed:",e)}
