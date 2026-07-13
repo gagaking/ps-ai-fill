@@ -1,0 +1,7 @@
+node_modules/
+release/
+cache/
+*.log
+.env
+.env*
+dist/.vite/
