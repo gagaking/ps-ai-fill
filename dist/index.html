@@ -144,6 +144,12 @@ var _gf=setInterval(function(){
 // ===== 6. Download: POST proxy + IPC =====
 window.fetch=(function(of){
  return function(i,init){
+  // ===== 10. Cache-busting for external image fetches =====
+  if(typeof i==="string"&&i.indexOf("http")===0&&(!init||init.method==="GET"||!init.method)){
+    var sep=i.indexOf("?")>-1?"&":"?";
+    i=i+sep+"_cb="+Date.now();
+  }
+
   var u=(typeof i==="string")?i:(i&&i.url)||"";
   if(u.indexOf("/api/ps/download")>-1&&init&&init.method==="POST"){
    try{var b=JSON.parse(init.body);if(b&&b.url&&window.electronAPI&&window.electronAPI.downloadImage)window.electronAPI.downloadImage({url:b.url,filename:b.filename||"image.png",downloadPath:""});}catch(e){}
