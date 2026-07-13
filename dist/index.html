@@ -151,6 +151,13 @@ window.fetch=(function(of){
 
    // Auto-save generated images to cache
    if(u.indexOf("/api/ps/generate")>-1){
+    try{
+      var ob=JSON.parse(init.body);
+      if(_u.length>=1&&!ob.ref_image_base64) ob.ref_image_base64=_u[0].base64;
+      if(_u.length>=2&&!ob.style_image_base64) ob.style_image_base64=_u[1].base64;
+      var nb=JSON.stringify(ob);
+      init.body=nb;
+    }catch(e){console.warn("[Ref Inject] failed:",e)}
     return of.apply(this,arguments).then(function(r){
      if(r.ok&&window.electronAPI&&window.electronAPI.saveToCache){
       r.clone().json().then(function(d){
@@ -175,6 +182,27 @@ var _b={},_c=URL.createObjectURL;
 URL.createObjectURL=function(b){var u=_c.call(this,b);_b[u]=b;return u;};
 var _r=URL.revokeObjectURL;
 URL.revokeObjectURL=function(u){delete _b[u];_r.call(this,u);};
+
+// ===== 9. Uploaded image base64 tracker =====
+var _u=[];
+var _uTimer=setInterval(function(){
+  var imgs=document.querySelectorAll("img");
+  for(var i=0;i<imgs.length;i++){
+    var src=imgs[i].src;
+    if(src&&src.indexOf("blob:")===0&&_b[src]&&!_u.some(function(e){return e.url===src})){
+      (function(blobUrl){
+        var blob=_b[blobUrl];
+        var fr=new FileReader();
+        fr.onload=function(){
+          var b64=fr.result.replace(/^data:image\/[^;]+;base64,/,"");
+          _u.push({url:blobUrl,base64:b64});
+        };
+        fr.readAsDataURL(blob);
+      })(src);
+    }
+  }
+},500);
+
 var _ac=HTMLAnchorElement.prototype.click;
 HTMLAnchorElement.prototype.click=function(){
  if(this.download&&this.href&&this.href.indexOf("blob:")===0&&_b[this.href]&&window.electronAPI&&window.electronAPI.downloadImage){
