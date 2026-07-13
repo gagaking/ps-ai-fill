@@ -678,10 +678,10 @@ async function startServer() {
           n: Number(n),
           response_format
         };
-        if (image_base64) payload.image_base64 = image_base64;
-        if (ref_image_base64) payload.ref_image_base64 = ref_image_base64;
-        if (style_image_base64) payload.style_image_base64 = style_image_base64;
         if (model === "gpt-image-2") {
+          if (image_base64) payload.image_base64 = image_base64;
+          if (ref_image_base64) payload.ref_image_base64 = ref_image_base64;
+          if (style_image_base64) payload.style_image_base64 = style_image_base64;
           if (size) payload.size = size;
           if (quality) payload.quality = quality;
         } else {
