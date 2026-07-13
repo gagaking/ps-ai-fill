@@ -634,7 +634,6 @@ async function startServer() {
       }
       const hasInputImage = !!(image || image_base64);
 const isChatModel = model === "gemini-3.1-flash-lite-image";
-const isChatModel = model === "gemini-3.1-flash-lite-image";
       const endpoint = isChatModel ? "/v1/chat/completions" : (hasInputImage ? "/v1/images/edits" : "/v1/images/generations");
       const targetURL = `https://api.apilio.ai${endpoint}`;
       let fetchOptions;
