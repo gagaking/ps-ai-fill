@@ -632,15 +632,13 @@ async function startServer() {
           simulationType: matchedLabel
         });
       }
-      const modelMap = { "gemini-3.1-flash-lite-image": "nano-banana-2" };
-let apiModel = modelMap[model] || model;
-const hasInputImage = !!(image || image_base64);
+      const hasInputImage = !!(image || image_base64);
       const endpoint = hasInputImage ? "/v1/images/edits" : "/v1/images/generations";
       const targetURL = `https://api.apilio.ai${endpoint}`;
       let fetchOptions;
       if (hasInputImage) {
         const formData = new FormData();
-        formData.append("model", apiModel);
+        formData.append("model", model);
         formData.append("prompt", prompt);
         // n is not valid in FormData mode
         formData.append("response_format", response_format);
@@ -675,7 +673,7 @@ const hasInputImage = !!(image || image_base64);
         };
       } else {
         const payload = {
-          model: apiModel,
+          model,
           prompt,
           n: Number(n),
           response_format
