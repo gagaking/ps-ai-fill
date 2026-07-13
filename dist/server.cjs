@@ -633,10 +633,26 @@ async function startServer() {
         });
       }
       const hasInputImage = !!(image || image_base64);
-      const endpoint = hasInputImage ? "/v1/images/edits" : "/v1/images/generations";
+const isChatModel = model === "gemini-3.1-flash-lite-image";
+const isChatModel = model === "gemini-3.1-flash-lite-image";
+      const endpoint = isChatModel ? "/v1/chat/completions" : (hasInputImage ? "/v1/images/edits" : "/v1/images/generations");
       const targetURL = `https://api.apilio.ai${endpoint}`;
       let fetchOptions;
-      if (hasInputImage) {
+      if (isChatModel) {
+        var chatContent = [{ type: "text", text: prompt }];
+        if (image_base64) chatContent.push({ type: "image_url", image_url: { url: "data:image/png;base64," + image_base64 } });
+        if (ref_image_base64) chatContent.push({ type: "image_url", image_url: { url: "data:image/png;base64," + ref_image_base64 } });
+        if (style_image_base64) chatContent.push({ type: "image_url", image_url: { url: "data:image/png;base64," + style_image_base64 } });
+        var chatPayload = { model: model, messages: [{ role: "user", content: chatContent }], n: Number(n) };
+        fetchOptions = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKeyToUse}`
+          },
+          body: JSON.stringify(chatPayload)
+        };
+      } else if (hasInputImage) {
         const formData = new FormData();
         formData.append("model", model);
         formData.append("prompt", prompt);
@@ -714,6 +730,13 @@ async function startServer() {
         });
       }
       const jsonResponse = JSON.parse(responseBodyText);
+      if (isChatModel) {
+        var chatContent = jsonResponse.choices?.[0]?.message?.content || "";
+        var urlMatch = chatContent.match(/\!\[.*?\]\((.*?)\)/);
+        var imageUrl = urlMatch ? urlMatch[1] : (chatContent.startsWith("http") || chatContent.startsWith("data:image") ? chatContent : "");
+        var txResponse = { created: jsonResponse.created || Date.now(), data: imageUrl ? [{ url: imageUrl }] : [{ b64_json: chatContent }] };
+        return res.json(txResponse);
+      }
       console.log(`[Proxy Response] Status: ${response.status}, hasData: ${jsonResponse.data ? jsonResponse.data.length : 0}, isExtend: ${isExtend2}`);
       return res.json(jsonResponse);
     } catch (error) {
